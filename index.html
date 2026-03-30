@@ -1,512 +1,546 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Terminal, ShieldCheck, Code, Lock, Unlock, Wifi, 
-  AlertTriangle, Smartphone, Key, Database, Server, 
-  Repeat, GitBranch, ArrowDown, BookOpen, Blocks, CheckCircle2, XCircle
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS Concepts Explorer</title>
 
-// --- Reusable UI Components ---
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-const Card = ({ title, icon: Icon, frontText, backText, analogy }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
-
-  return (
-    <div 
-      className="relative w-full h-64 perspective-1000 cursor-pointer group"
-      onClick={() => setIsFlipped(!isFlipped)}
-    >
-      <div className={`w-full h-full transition-transform duration-500 transform-style-3d rounded-xl shadow-lg ${isFlipped ? 'rotate-y-180' : ''}`}>
-        {/* Front of Card */}
-        <div className="absolute w-full h-full backface-hidden bg-slate-800 border border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-slate-700 transition-colors">
-          <Icon className="w-12 h-12 text-blue-400 mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-          <p className="text-slate-400 text-sm">{frontText}</p>
-          <p className="text-xs text-blue-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">Click to flip</p>
-        </div>
-        
-        {/* Back of Card */}
-        <div className="absolute w-full h-full backface-hidden bg-blue-600 rounded-xl p-6 rotate-y-180 flex flex-col items-center justify-center text-center overflow-y-auto">
-          <p className="text-white font-medium mb-4">{backText}</p>
-          <div className="bg-blue-800/50 p-3 rounded-lg w-full">
-            <p className="text-sm text-blue-100"><span className="font-bold text-white">Analogy:</span> {analogy}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Interactive Simulators ---
-
-const APISimulator = () => {
-  const [status, setStatus] = useState('idle'); // idle, requesting, fetching, success
-  const [data, setData] = useState(null);
-
-  const simulateAPI = () => {
-    setStatus('requesting');
-    setData(null);
-    setTimeout(() => setStatus('fetching'), 1000);
-    setTimeout(() => {
-      setStatus('success');
-      setData({ temp: '72°F', condition: 'Sunny', location: 'New York' });
-    }, 2500);
-  };
-
-  return (
-    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mt-6">
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Server className="text-emerald-400" /> API Interactive Demo
-      </h3>
-      <p className="text-slate-400 mb-6 text-sm">See how your app (the client) talks to a database (the kitchen) using an API (the waiter).</p>
-      
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-        {/* Client */}
-        <div className="bg-slate-900 p-4 rounded-lg flex flex-col items-center w-full md:w-1/3 border border-slate-700">
-          <Smartphone className="w-8 h-8 text-blue-400 mb-2" />
-          <span className="text-white font-semibold">Your Weather App</span>
-          <button 
-            onClick={simulateAPI}
-            disabled={status !== 'idle' && status !== 'success'}
-            className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white rounded-lg transition-colors text-sm w-full"
-          >
-            {status === 'idle' || status === 'success' ? 'Get Weather' : 'Waiting...'}
-          </button>
-        </div>
-
-        {/* API / Waiter */}
-        <div className="flex-1 flex flex-col items-center relative w-full md:w-auto">
-          <div className="h-1 w-full bg-slate-700 absolute top-1/2 -translate-y-1/2 -z-10"></div>
-          
-          {status === 'requesting' && (
-            <div className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs animate-bounce mb-2">Requesting...</div>
-          )}
-          {status === 'fetching' && (
-            <div className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs animate-bounce mb-2">Getting Data...</div>
-          )}
-          {status === 'success' && (
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs mb-2">Data Delivered!</div>
-          )}
-          
-          <div className={`p-3 rounded-full ${status !== 'idle' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
-            <Database className="w-6 h-6" />
-          </div>
-          <span className="text-slate-400 text-xs mt-2 font-mono">API</span>
-        </div>
-
-        {/* Database */}
-        <div className="bg-slate-900 p-4 rounded-lg flex flex-col items-center w-full md:w-1/3 border border-slate-700">
-          <Server className="w-8 h-8 text-purple-400 mb-2" />
-          <span className="text-white font-semibold">National Weather DB</span>
-          <div className="mt-4 h-10 flex items-center justify-center">
-            {status === 'fetching' ? (
-              <span className="text-purple-400 text-sm animate-pulse">Searching DB...</span>
-            ) : (
-              <span className="text-slate-600 text-sm">Waiting for request</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {data && status === 'success' && (
-        <div className="bg-emerald-900/30 border border-emerald-500/50 p-4 rounded-lg text-center animate-fade-in">
-          <p className="text-emerald-400 font-bold text-lg">{data.location}: {data.temp}, {data.condition}</p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const EncryptionSimulator = () => {
-  const [message, setMessage] = useState("Hello Hackers");
-  const [encType, setEncType] = useState('symmetric');
-
-  const scrambleText = (text) => {
-    return text.split('').map(char => {
-      if (char === ' ') return ' ';
-      return String.fromCharCode(char.charCodeAt(0) + 3);
-    }).join('');
-  };
-
-  return (
-    <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mt-6">
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Key className="text-red-400" /> Encryption Visualizer
-      </h3>
-      
-      <div className="flex gap-4 mb-6">
-        <button 
-          onClick={() => setEncType('symmetric')}
-          className={`flex-1 py-2 rounded-lg font-medium transition-colors ${encType === 'symmetric' ? 'bg-red-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-        >
-          Symmetric (1 Key)
-        </button>
-        <button 
-          onClick={() => setEncType('asymmetric')}
-          className={`flex-1 py-2 rounded-lg font-medium transition-colors ${encType === 'asymmetric' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-        >
-          Public Key (2 Keys)
-        </button>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-4 items-center">
-        <div className="space-y-2">
-          <label className="text-sm text-slate-400">Original Message</label>
-          <input 
-            type="text" 
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"
-            maxLength={20}
-          />
-        </div>
-        
-        <div className="flex flex-col items-center justify-center space-y-2">
-          {encType === 'symmetric' ? (
-            <>
-              <Lock className="text-red-400 w-8 h-8" />
-              <p className="text-xs text-center text-slate-400">Same Secret Key locks & unlocks</p>
-            </>
-          ) : (
-            <>
-              <div className="flex gap-2">
-                <Lock className="text-slate-400 w-6 h-6" />
-                <Unlock className="text-indigo-400 w-6 h-6" />
-              </div>
-              <p className="text-xs text-center text-slate-400">Public Key locks,<br/>Private Key unlocks</p>
-            </>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm text-slate-400">Encrypted Data (Scrambled)</label>
-          <div className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-red-400 font-mono overflow-hidden whitespace-nowrap">
-            {message ? scrambleText(message) : '...'}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Quiz = () => {
-  const [currentQ, setCurrentQ] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showResults, setShowResults] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-
-  const questions = [
+  <!-- Tell the browser where to find React and our Icons -->
+  <script type="importmap">
     {
-      q: "Which programming concept is like making a decision (If/Then)?",
-      options: ["Sequencing", "Selection", "Iteration", "Modularity"],
-      answer: 1
-    },
-    {
-      q: "What is an API best described as?",
-      options: ["A locked database", "A waiter passing requests and responses", "A repeating loop", "A fake Wi-Fi network"],
-      answer: 1
-    },
-    {
-      q: "If a hacker sets up a fake Wi-Fi network at a coffee shop, what is this called?",
-      options: ["Phishing", "Multifactor Authentication", "Rogue Access Point", "API Injection"],
-      answer: 2
-    },
-    {
-      q: "Why do programmers use Libraries?",
-      options: ["To read books", "To encrypt their passwords", "To run code line-by-line", "To borrow pre-written code so they don't start from scratch"],
-      answer: 3
-    },
-    {
-      q: "Public Key Encryption uses how many keys?",
-      options: ["One shared key", "Two keys (one public to lock, one private to unlock)", "Three keys", "No keys, it uses passwords"],
-      answer: 1
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.344.0"
+      }
     }
-  ];
+  </script>
 
-  const handleAnswer = (index) => {
-    setSelectedAnswer(index);
-    setTimeout(() => {
-      if (index === questions[currentQ].answer) {
-        setScore(score + 1);
-      }
-      if (currentQ < questions.length - 1) {
-        setCurrentQ(currentQ + 1);
-        setSelectedAnswer(null);
-      } else {
-        setShowResults(true);
-      }
-    }, 1000);
-  };
+  <!-- Load Babel so the browser can understand our React JSX code -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  const resetQuiz = () => {
-    setCurrentQ(0);
-    setScore(0);
-    setShowResults(false);
-    setSelectedAnswer(null);
-  };
+  <!-- Add our custom 3D flip animation styles here -->
+  <style>
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(10px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200">
+  
+  <!-- This is where our React app will appear -->
+  <div id="root"></div>
 
-  if (showResults) {
-    return (
-      <div className="bg-slate-800 p-8 rounded-2xl text-center border border-slate-700 animate-fade-in">
-        <h2 className="text-3xl font-bold text-white mb-4">Quiz Complete!</h2>
-        <div className="text-6xl font-bold text-blue-400 mb-6">
-          {score} / {questions.length}
-        </div>
-        <p className="text-slate-300 mb-8">
-          {score === 5 ? "Perfect score! You're ready to code AND hack the mainframe." : 
-           score >= 3 ? "Great job! You know your stuff." : 
-           "Keep exploring! Review the tabs to master these concepts."}
-        </p>
-        <button 
-          onClick={resetQuiz}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors"
+  <!-- Our actual React Application -->
+  <script type="text/babel" data-type="module">
+    import React, { useState } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { 
+      Terminal, ShieldCheck, Code, Lock, Unlock, Wifi, 
+      AlertTriangle, Smartphone, Key, Database, Server, 
+      Repeat, GitBranch, ArrowDown, BookOpen, Blocks, CheckCircle2, XCircle
+    } from 'lucide-react';
+
+    // --- Reusable UI Components ---
+    const Card = ({ title, icon: Icon, frontText, backText, analogy }) => {
+      const [isFlipped, setIsFlipped] = useState(false);
+
+      return (
+        <div 
+          className="relative w-full h-64 perspective-1000 cursor-pointer group"
+          onClick={() => setIsFlipped(!isFlipped)}
         >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <span className="text-blue-400 font-bold text-sm">Question {currentQ + 1} of {questions.length}</span>
-        <span className="text-slate-400 text-sm">Score: {score}</span>
-      </div>
-      
-      <h3 className="text-xl text-white font-medium mb-8">{questions[currentQ].q}</h3>
-      
-      <div className="space-y-3">
-        {questions[currentQ].options.map((opt, index) => {
-          let btnClass = "w-full text-left p-4 rounded-xl border transition-all ";
-          
-          if (selectedAnswer === null) {
-            btnClass += "bg-slate-900 border-slate-700 hover:border-blue-500 hover:bg-slate-800 text-slate-300";
-          } else if (index === questions[currentQ].answer) {
-            btnClass += "bg-emerald-900/50 border-emerald-500 text-emerald-400";
-          } else if (index === selectedAnswer) {
-            btnClass += "bg-red-900/50 border-red-500 text-red-400";
-          } else {
-            btnClass += "bg-slate-900 border-slate-800 text-slate-500 opacity-50";
-          }
-
-          return (
-            <button
-              key={index}
-              onClick={() => selectedAnswer === null && handleAnswer(index)}
-              className={btnClass}
-              disabled={selectedAnswer !== null}
-            >
-              <div className="flex justify-between items-center">
-                <span>{opt}</span>
-                {selectedAnswer !== null && index === questions[currentQ].answer && <CheckCircle2 className="w-5 h-5" />}
-                {selectedAnswer === index && index !== questions[currentQ].answer && <XCircle className="w-5 h-5" />}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// --- Main Application ---
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState('software');
-
-  // Custom styles for 3D flip effect injected into the document
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      .perspective-1000 { perspective: 1000px; }
-      .transform-style-3d { transform-style: preserve-3d; }
-      .backface-hidden { backface-visibility: hidden; }
-      .rotate-y-180 { transform: rotateY(180deg); }
-      .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30">
-      
-      {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg">
-              <Terminal className="text-white w-6 h-6" />
-            </div>
-            <h1 className="text-xl font-bold text-white tracking-tight">CS Explorer</h1>
-          </div>
-          
-          <nav className="flex gap-2 p-1 bg-slate-800 rounded-lg">
-            <button 
-              onClick={() => setActiveTab('software')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'software' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-            >
-              <Code className="w-4 h-4 inline-block mr-2 mb-1" />
-              Software Design
-            </button>
-            <button 
-              onClick={() => setActiveTab('cyber')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'cyber' ? 'bg-red-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-            >
-              <ShieldCheck className="w-4 h-4 inline-block mr-2 mb-1" />
-              Cybersecurity
-            </button>
-            <button 
-              onClick={() => setActiveTab('quiz')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'quiz' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
-            >
-              <BookOpen className="w-4 h-4 inline-block mr-2 mb-1" />
-              Knowledge Check
-            </button>
-          </nav>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="max-w-6xl mx-auto px-4 py-12">
-        
-        {/* SOFTWARE TAB */}
-        {activeTab === 'software' && (
-          <div className="animate-fade-in space-y-12">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 mb-4">
-                Building the Digital World
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Before you can hack it, you have to build it. Learn the fundamental building blocks that every app, game, and website uses to function.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card 
-                title="Sequencing" 
-                icon={ArrowDown}
-                frontText="The foundation of all logic."
-                backText="Executing code line-by-line, in exact order."
-                analogy="Like reading a recipe. You don't bake the cake before you mix the batter."
-              />
-              <Card 
-                title="Selection" 
-                icon={GitBranch}
-                frontText="Making decisions in code."
-                backText="Using If/Then logic to choose different paths."
-                analogy="If it's raining, take an umbrella. Else, grab sunglasses."
-              />
-              <Card 
-                title="Iteration" 
-                icon={Repeat}
-                frontText="Doing things over and over."
-                backText="Repeating a process using loops (For, While)."
-                analogy="Instead of saying 'take a step' 100 times, you say 'repeat taking a step until you reach the door.'"
-              />
-            </div>
-
-            <div className="border-t border-slate-800 pt-12">
-              <h3 className="text-2xl font-bold text-white mb-6 text-center">Working Smarter, Not Harder</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <Card 
-                  title="Modularity" 
-                  icon={Blocks}
-                  frontText="Breaking big problems down."
-                  backText="Dividing a complex program into smaller, manageable, independent chunks."
-                  analogy="Building a car using individual Lego bricks instead of carving the whole car out of one piece of wood."
-                />
-                 <Card 
-                  title="Library" 
-                  icon={BookOpen}
-                  frontText="Borrowing someone else's work."
-                  backText="A collection of pre-written code that you can import and use."
-                  analogy="Need complex math? Don't write the formulas yourself. Go to the 'Math Library' and check out the code."
-                />
-              </div>
-            </div>
-
-            {/* Interactive API Section */}
-            <APISimulator />
-          </div>
-        )}
-
-        {/* CYBERSECURITY TAB */}
-        {activeTab === 'cyber' && (
-          <div className="animate-fade-in space-y-12">
-            <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 mb-4">
-                Protecting the Grid
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Hackers don't always use complex code. Often, they just trick you. Learn how data is stolen and how we lock it down.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-2">The Threats</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card 
-                  title="Phishing" 
-                  icon={AlertTriangle}
-                  frontText="The classic digital trap."
-                  backText="Fake emails or messages designed to trick you into giving away passwords."
-                  analogy="A fake Netflix email saying your account is suspended, linking to a fake login page."
-                />
-                <Card 
-                  title="Rogue Access Point" 
-                  icon={Wifi}
-                  frontText="Danger in the coffee shop."
-                  backText="A fake Wi-Fi network set up by a hacker to intercept your data."
-                  analogy="Connecting to 'Free Airport Wi-Fi' which is actually just a hacker's laptop snooping on your web traffic."
-                />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-2">The Defenses</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card 
-                  title="PII" 
-                  icon={Smartphone}
-                  frontText="What they are trying to steal."
-                  backText="Personally Identifiable Information. Data that points directly to you."
-                  analogy="Social Security Numbers, biometrics, full name, and address."
-                />
-                <Card 
-                  title="MFA" 
-                  icon={ShieldCheck}
-                  frontText="Double-locking the door."
-                  backText="Multifactor Authentication. Proving who you are in more than one way."
-                  analogy="Something you KNOW (a password) + Something you HAVE (a text code to your phone)."
-                />
-              </div>
-            </div>
-
-            {/* Interactive Encryption Section */}
-            <EncryptionSimulator />
-
-          </div>
-        )}
-
-        {/* QUIZ TAB */}
-        {activeTab === 'quiz' && (
-          <div className="animate-fade-in">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-4">
-                Knowledge Check
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Test your skills. Can you identify these core Computer Science concepts?
-              </p>
+          <div className={`w-full h-full transition-transform duration-500 transform-style-3d rounded-xl shadow-lg ${isFlipped ? 'rotate-y-180' : ''}`}>
+            {/* Front of Card */}
+            <div className="absolute w-full h-full backface-hidden bg-slate-800 border border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-slate-700 transition-colors">
+              <Icon className="w-12 h-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+              <p className="text-slate-400 text-sm">{frontText}</p>
+              <p className="text-xs text-blue-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">Click to flip</p>
             </div>
             
-            <Quiz />
+            {/* Back of Card */}
+            <div className="absolute w-full h-full backface-hidden bg-blue-600 rounded-xl p-6 rotate-y-180 flex flex-col items-center justify-center text-center overflow-y-auto">
+              <p className="text-white font-medium mb-4">{backText}</p>
+              <div className="bg-blue-800/50 p-3 rounded-lg w-full">
+                <p className="text-sm text-blue-100"><span className="font-bold text-white">Analogy:</span> {analogy}</p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+      );
+    };
 
-      </main>
-    </div>
-  );
-}
+    // --- Interactive Simulators ---
+    const APISimulator = () => {
+      const [status, setStatus] = useState('idle');
+      const [data, setData] = useState(null);
+
+      const simulateAPI = () => {
+        setStatus('requesting');
+        setData(null);
+        setTimeout(() => setStatus('fetching'), 1000);
+        setTimeout(() => {
+          setStatus('success');
+          setData({ temp: '72°F', condition: 'Sunny', location: 'New York' });
+        }, 2500);
+      };
+
+      return (
+        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mt-6">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Server className="text-emerald-400" /> API Interactive Demo
+          </h3>
+          <p className="text-slate-400 mb-6 text-sm">See how your app (the client) talks to a database (the kitchen) using an API (the waiter).</p>
+          
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            {/* Client */}
+            <div className="bg-slate-900 p-4 rounded-lg flex flex-col items-center w-full md:w-1/3 border border-slate-700">
+              <Smartphone className="w-8 h-8 text-blue-400 mb-2" />
+              <span className="text-white font-semibold">Your Weather App</span>
+              <button 
+                onClick={simulateAPI}
+                disabled={status !== 'idle' && status !== 'success'}
+                className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white rounded-lg transition-colors text-sm w-full"
+              >
+                {status === 'idle' || status === 'success' ? 'Get Weather' : 'Waiting...'}
+              </button>
+            </div>
+
+            {/* API / Waiter */}
+            <div className="flex-1 flex flex-col items-center relative w-full md:w-auto">
+              <div className="h-1 w-full bg-slate-700 absolute top-1/2 -translate-y-1/2 -z-10"></div>
+              
+              {status === 'requesting' && (
+                <div className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs animate-bounce mb-2">Requesting...</div>
+              )}
+              {status === 'fetching' && (
+                <div className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs animate-bounce mb-2">Getting Data...</div>
+              )}
+              {status === 'success' && (
+                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs mb-2">Data Delivered!</div>
+              )}
+              
+              <div className={`p-3 rounded-full ${status !== 'idle' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
+                <Database className="w-6 h-6" />
+              </div>
+              <span className="text-slate-400 text-xs mt-2 font-mono">API</span>
+            </div>
+
+            {/* Database */}
+            <div className="bg-slate-900 p-4 rounded-lg flex flex-col items-center w-full md:w-1/3 border border-slate-700">
+              <Server className="w-8 h-8 text-purple-400 mb-2" />
+              <span className="text-white font-semibold">National Weather DB</span>
+              <div className="mt-4 h-10 flex items-center justify-center">
+                {status === 'fetching' ? (
+                  <span className="text-purple-400 text-sm animate-pulse">Searching DB...</span>
+                ) : (
+                  <span className="text-slate-600 text-sm">Waiting for request</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {data && status === 'success' && (
+            <div className="bg-emerald-900/30 border border-emerald-500/50 p-4 rounded-lg text-center animate-fade-in">
+              <p className="text-emerald-400 font-bold text-lg">{data.location}: {data.temp}, {data.condition}</p>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const EncryptionSimulator = () => {
+      const [message, setMessage] = useState("Hello Hackers");
+      const [encType, setEncType] = useState('symmetric');
+
+      const scrambleText = (text) => {
+        return text.split('').map(char => {
+          if (char === ' ') return ' ';
+          return String.fromCharCode(char.charCodeAt(0) + 3);
+        }).join('');
+      };
+
+      return (
+        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 mt-6">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Key className="text-red-400" /> Encryption Visualizer
+          </h3>
+          
+          <div className="flex gap-4 mb-6">
+            <button 
+              onClick={() => setEncType('symmetric')}
+              className={`flex-1 py-2 rounded-lg font-medium transition-colors ${encType === 'symmetric' ? 'bg-red-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            >
+              Symmetric (1 Key)
+            </button>
+            <button 
+              onClick={() => setEncType('asymmetric')}
+              className={`flex-1 py-2 rounded-lg font-medium transition-colors ${encType === 'asymmetric' ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+            >
+              Public Key (2 Keys)
+            </button>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 items-center">
+            <div className="space-y-2">
+              <label className="text-sm text-slate-400">Original Message</label>
+              <input 
+                type="text" 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"
+                maxLength={20}
+              />
+            </div>
+            
+            <div className="flex flex-col items-center justify-center space-y-2">
+              {encType === 'symmetric' ? (
+                <>
+                  <Lock className="text-red-400 w-8 h-8" />
+                  <p className="text-xs text-center text-slate-400">Same Secret Key locks & unlocks</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <Lock className="text-slate-400 w-6 h-6" />
+                    <Unlock className="text-indigo-400 w-6 h-6" />
+                  </div>
+                  <p className="text-xs text-center text-slate-400">Public Key locks,<br/>Private Key unlocks</p>
+                </>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-slate-400">Encrypted Data (Scrambled)</label>
+              <div className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-red-400 font-mono overflow-hidden whitespace-nowrap">
+                {message ? scrambleText(message) : '...'}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Quiz = () => {
+      const [currentQ, setCurrentQ] = useState(0);
+      const [score, setScore] = useState(0);
+      const [showResults, setShowResults] = useState(false);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+      const questions = [
+        {
+          q: "Which programming concept is like making a decision (If/Then)?",
+          options: ["Sequencing", "Selection", "Iteration", "Modularity"],
+          answer: 1
+        },
+        {
+          q: "What is an API best described as?",
+          options: ["A locked database", "A waiter passing requests and responses", "A repeating loop", "A fake Wi-Fi network"],
+          answer: 1
+        },
+        {
+          q: "If a hacker sets up a fake Wi-Fi network at a coffee shop, what is this called?",
+          options: ["Phishing", "Multifactor Authentication", "Rogue Access Point", "API Injection"],
+          answer: 2
+        },
+        {
+          q: "Why do programmers use Libraries?",
+          options: ["To read books", "To encrypt their passwords", "To run code line-by-line", "To borrow pre-written code so they don't start from scratch"],
+          answer: 3
+        },
+        {
+          q: "Public Key Encryption uses how many keys?",
+          options: ["One shared key", "Two keys (one public to lock, one private to unlock)", "Three keys", "No keys, it uses passwords"],
+          answer: 1
+        }
+      ];
+
+      const handleAnswer = (index) => {
+        setSelectedAnswer(index);
+        setTimeout(() => {
+          if (index === questions[currentQ].answer) {
+            setScore(score + 1);
+          }
+          if (currentQ < questions.length - 1) {
+            setCurrentQ(currentQ + 1);
+            setSelectedAnswer(null);
+          } else {
+            setShowResults(true);
+          }
+        }, 1000);
+      };
+
+      const resetQuiz = () => {
+        setCurrentQ(0);
+        setScore(0);
+        setShowResults(false);
+        setSelectedAnswer(null);
+      };
+
+      if (showResults) {
+        return (
+          <div className="bg-slate-800 p-8 rounded-2xl text-center border border-slate-700 animate-fade-in">
+            <h2 className="text-3xl font-bold text-white mb-4">Quiz Complete!</h2>
+            <div className="text-6xl font-bold text-blue-400 mb-6">
+              {score} / {questions.length}
+            </div>
+            <p className="text-slate-300 mb-8">
+              {score === 5 ? "Perfect score! You're ready to code AND hack the mainframe." : 
+               score >= 3 ? "Great job! You know your stuff." : 
+               "Keep exploring! Review the tabs to master these concepts."}
+            </p>
+            <button 
+              onClick={resetQuiz}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <div className="bg-slate-800 p-8 rounded-2xl border border-slate-700 max-w-2xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-blue-400 font-bold text-sm">Question {currentQ + 1} of {questions.length}</span>
+            <span className="text-slate-400 text-sm">Score: {score}</span>
+          </div>
+          
+          <h3 className="text-xl text-white font-medium mb-8">{questions[currentQ].q}</h3>
+          
+          <div className="space-y-3">
+            {questions[currentQ].options.map((opt, index) => {
+              let btnClass = "w-full text-left p-4 rounded-xl border transition-all ";
+              
+              if (selectedAnswer === null) {
+                btnClass += "bg-slate-900 border-slate-700 hover:border-blue-500 hover:bg-slate-800 text-slate-300";
+              } else if (index === questions[currentQ].answer) {
+                btnClass += "bg-emerald-900/50 border-emerald-500 text-emerald-400";
+              } else if (index === selectedAnswer) {
+                btnClass += "bg-red-900/50 border-red-500 text-red-400";
+              } else {
+                btnClass += "bg-slate-900 border-slate-800 text-slate-500 opacity-50";
+              }
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => selectedAnswer === null && handleAnswer(index)}
+                  className={btnClass}
+                  disabled={selectedAnswer !== null}
+                >
+                  <div className="flex justify-between items-center">
+                    <span>{opt}</span>
+                    {selectedAnswer !== null && index === questions[currentQ].answer && <CheckCircle2 className="w-5 h-5" />}
+                    {selectedAnswer === index && index !== questions[currentQ].answer && <XCircle className="w-5 h-5" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    };
+
+    // --- Main Application ---
+    function App() {
+      const [activeTab, setActiveTab] = useState('software');
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30">
+          
+          {/* Header */}
+          <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+            <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2 rounded-lg">
+                  <Terminal className="text-white w-6 h-6" />
+                </div>
+                <h1 className="text-xl font-bold text-white tracking-tight">CS Explorer</h1>
+              </div>
+              
+              <nav className="flex gap-2 p-1 bg-slate-800 rounded-lg">
+                <button 
+                  onClick={() => setActiveTab('software')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'software' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                >
+                  <Code className="w-4 h-4 inline-block mr-2 mb-1" />
+                  Software Design
+                </button>
+                <button 
+                  onClick={() => setActiveTab('cyber')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'cyber' ? 'bg-red-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                >
+                  <ShieldCheck className="w-4 h-4 inline-block mr-2 mb-1" />
+                  Cybersecurity
+                </button>
+                <button 
+                  onClick={() => setActiveTab('quiz')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'quiz' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
+                >
+                  <BookOpen className="w-4 h-4 inline-block mr-2 mb-1" />
+                  Knowledge Check
+                </button>
+              </nav>
+            </div>
+          </header>
+
+          {/* Main Content Area */}
+          <main className="max-w-6xl mx-auto px-4 py-12">
+            
+            {/* SOFTWARE TAB */}
+            {activeTab === 'software' && (
+              <div className="animate-fade-in space-y-12">
+                <div className="text-center max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 mb-4">
+                    Building the Digital World
+                  </h2>
+                  <p className="text-slate-400 text-lg">
+                    Before you can hack it, you have to build it. Learn the fundamental building blocks that every app, game, and website uses to function.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card 
+                    title="Sequencing" 
+                    icon={ArrowDown}
+                    frontText="The foundation of all logic."
+                    backText="Executing code line-by-line, in exact order."
+                    analogy="Like reading a recipe. You don't bake the cake before you mix the batter."
+                  />
+                  <Card 
+                    title="Selection" 
+                    icon={GitBranch}
+                    frontText="Making decisions in code."
+                    backText="Using If/Then logic to choose different paths."
+                    analogy="If it's raining, take an umbrella. Else, grab sunglasses."
+                  />
+                  <Card 
+                    title="Iteration" 
+                    icon={Repeat}
+                    frontText="Doing things over and over."
+                    backText="Repeating a process using loops (For, While)."
+                    analogy="Instead of saying 'take a step' 100 times, you say 'repeat taking a step until you reach the door.'"
+                  />
+                </div>
+
+                <div className="border-t border-slate-800 pt-12">
+                  <h3 className="text-2xl font-bold text-white mb-6 text-center">Working Smarter, Not Harder</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <Card 
+                      title="Modularity" 
+                      icon={Blocks}
+                      frontText="Breaking big problems down."
+                      backText="Dividing a complex program into smaller, manageable, independent chunks."
+                      analogy="Building a car using individual Lego bricks instead of carving the whole car out of one piece of wood."
+                    />
+                     <Card 
+                      title="Library" 
+                      icon={BookOpen}
+                      frontText="Borrowing someone else's work."
+                      backText="A collection of pre-written code that you can import and use."
+                      analogy="Need complex math? Don't write the formulas yourself. Go to the 'Math Library' and check out the code."
+                    />
+                  </div>
+                </div>
+
+                {/* Interactive API Section */}
+                <APISimulator />
+              </div>
+            )}
+
+            {/* CYBERSECURITY TAB */}
+            {activeTab === 'cyber' && (
+              <div className="animate-fade-in space-y-12">
+                <div className="text-center max-w-2xl mx-auto">
+                  <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 mb-4">
+                    Protecting the Grid
+                  </h2>
+                  <p className="text-slate-400 text-lg">
+                    Hackers don't always use complex code. Often, they just trick you. Learn how data is stolen and how we lock it down.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-2">The Threats</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card 
+                      title="Phishing" 
+                      icon={AlertTriangle}
+                      frontText="The classic digital trap."
+                      backText="Fake emails or messages designed to trick you into giving away passwords."
+                      analogy="A fake Netflix email saying your account is suspended, linking to a fake login page."
+                    />
+                    <Card 
+                      title="Rogue Access Point" 
+                      icon={Wifi}
+                      frontText="Danger in the coffee shop."
+                      backText="A fake Wi-Fi network set up by a hacker to intercept your data."
+                      analogy="Connecting to 'Free Airport Wi-Fi' which is actually just a hacker's laptop snooping on your web traffic."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-2">The Defenses</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card 
+                      title="PII" 
+                      icon={Smartphone}
+                      frontText="What they are trying to steal."
+                      backText="Personally Identifiable Information. Data that points directly to you."
+                      analogy="Social Security Numbers, biometrics, full name, and address."
+                    />
+                    <Card 
+                      title="MFA" 
+                      icon={ShieldCheck}
+                      frontText="Double-locking the door."
+                      backText="Multifactor Authentication. Proving who you are in more than one way."
+                      analogy="Something you KNOW (a password) + Something you HAVE (a text code to your phone)."
+                    />
+                  </div>
+                </div>
+
+                {/* Interactive Encryption Section */}
+                <EncryptionSimulator />
+
+              </div>
+            )}
+
+            {/* QUIZ TAB */}
+            {activeTab === 'quiz' && (
+              <div className="animate-fade-in">
+                <div className="text-center max-w-2xl mx-auto mb-10">
+                  <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-4">
+                    Knowledge Check
+                  </h2>
+                  <p className="text-slate-400 text-lg">
+                    Test your skills. Can you identify these core Computer Science concepts?
+                  </p>
+                </div>
+                
+                <Quiz />
+              </div>
+            )}
+
+          </main>
+        </div>
+      );
+    }
+
+    // Mount the application
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
